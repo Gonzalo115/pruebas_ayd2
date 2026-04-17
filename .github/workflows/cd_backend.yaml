@@ -19,11 +19,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Prepare image name
+        id: prep
+        run: |
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "owner_lc=$OWNER_LC" >> $GITHUB_OUTPUT
+          echo "image_name=ghcr.io/$OWNER_LC/pruebas_ayd2/logitrans-backend:latest" >> $GITHUB_OUTPUT
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push backend image
@@ -32,7 +39,7 @@ jobs:
           context: ./FASE 3/backend
           file: ./FASE 3/backend/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/pruebas_ayd2/logitrans-backend:latest
+          tags: ${{ steps.prep.outputs.image_name }}
 
       - name: Setup SSH key
         run: |
@@ -43,9 +50,9 @@ jobs:
 
       - name: Deploy on EC2
         run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
             cd ~/logitrans-deploy
-            docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GHCR_PAT }}
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
             docker compose pull
             docker compose up -d
             docker image prune -f
