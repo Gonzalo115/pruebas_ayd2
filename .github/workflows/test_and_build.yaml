@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  unit-tests:
+  backend-tests:
     runs-on: ubuntu-latest
 
     defaults:
@@ -33,15 +33,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.20.0
+          node-version: 22.x
           cache: npm
           cache-dependency-path: "FASE 3/backend/package-lock.json"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
+      - name: Run unit tests
         run: npm test
 
-      - name: Run test integration
+      - name: Run integration tests
         run: npm run test:int
