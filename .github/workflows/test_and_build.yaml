@@ -1,0 +1,42 @@
+name: Test and Build
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  test_and_build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.20.0]
+
+    defaults:
+      run:
+        working-directory: "FASE 3/backend"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: "FASE 3/backend/package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run build
+        run: npm run build --if-present
+
+      - name: Run unit tests
+        run: npm test
