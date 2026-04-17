@@ -1,7 +1,9 @@
 # 📋 Flujo de Registro de Usuarios - LogiTrans
 
 ## Visión General
+
 El sistema implementa un flujo de registro de usuarios con arquitectura **3-capas** (frontend → backend):
+
 - **Frontend**: Captura de datos y validación básica
 - **Backend**: Validación, procesamiento y persistencia en base de datos
 
@@ -10,7 +12,9 @@ El sistema implementa un flujo de registro de usuarios con arquitectura **3-capa
 ## 🏗️ ESTRUCTURA DEL BACKEND (FASE 3/backend/src)
 
 ### 1. **Controlador - `controllers/usuarios/usuarioController.js`**
+
 **Función principal:** `crearCliente()`
+
 - Ubicación: [src/controllers/usuarios/usuarioController.js](../../FASE%203/backend/src/controllers/usuarios/usuarioController.js)
 - **Responsabilidades:**
   - Recibe datos del formulario de registro (nombre, email, nit, teléfono, tipo_usuario, estado, password)
@@ -20,20 +24,24 @@ El sistema implementa un flujo de registro de usuarios con arquitectura **3-capa
   - Retorna respuesta HTTP 201 con datos del usuario creado
 
 **Código clave:**
+
 ```javascript
 const crearCliente = async (req, res) => {
-  const { nombre, email, nit, telefono, tipo_usuario, estado, password } = req.body;
+  const { nombre, email, nit, telefono, tipo_usuario, estado, password } =
+    req.body;
   // Validación de password
   // Hash con bcrypt
   // Llamada a servicio
   // Respuesta 201 con datos del usuario
-}
+};
 ```
 
 ---
 
 ### 2. **Modelo - `models/usuarios/Usuario.js`**
+
 **Funciones relevantes:**
+
 - Ubicación: [src/models/usuarios/Usuario.js](../../FASE%203/backend/src/models/usuarios/Usuario.js)
 - **Funciones principales:**
   - `buscarPorId()` - Obtiene usuario por ID
@@ -42,6 +50,7 @@ const crearCliente = async (req, res) => {
   - `cambiarEstado()` - Cambia estado de usuario (ACTIVO, INACTIVO, SUSPENDIDO, etc.)
 
 **Estructura de tabla:**
+
 ```sql
 usuarios (
   id INT PRIMARY KEY,
@@ -60,7 +69,9 @@ usuarios (
 ---
 
 ### 3. **Ruta POST - `routes/usuarios/usuarioRoutes.js`**
+
 **Endpoint:** `POST /api/usuarios`
+
 - Ubicación: [src/routes/usuarios/usuarioRoutes.js](../../FASE%203/backend/src/routes/usuarios/usuarioRoutes.js)
 - **Middleware:** `requireAuth` - Requiere autenticación con JWT
 - **Body esperado:**
@@ -94,6 +105,7 @@ usuarios (
   ```
 
 **Rutas adicionales para gestión de usuarios:**
+
 - `GET /api/usuarios` - Listar usuarios (con filtros)
 - `GET /api/usuarios/:id` - Obtener usuario específico
 - `PUT /api/usuarios/:id` - Actualizar datos de usuario
@@ -103,7 +115,9 @@ usuarios (
 ---
 
 ### 4. **Servicio - `services/usuarios/usuarioService.js`**
+
 **Función principal:** `crearCliente()`
+
 - Ubicación: [src/services/usuarios/usuarioService.js](../../FASE%203/backend/src/services/usuarios/usuarioService.js)
 - **Responsabilidades:**
   - Orquesta la lógica de negocio del registro
@@ -113,6 +127,7 @@ usuarios (
   - Gestión de transacciones
 
 **Funciones principales del servicio:**
+
 - `crearCliente()` - Crea nuevo cliente corporativo
 - `obtenerUsuario()` - Obtiene datos con perfil de riesgo si aplica
 - `listarUsuarios()` - Delega a modelo
@@ -121,27 +136,30 @@ usuarios (
 - `crearRiesgoCliente()` - Asigna perfil de riesgo
 
 **Características de auditoría:**
+
 ```javascript
 await Auditoria.registrar({
-  tabla_afectada: 'usuarios',
-  accion: 'INSERT',
+  tabla_afectada: "usuarios",
+  accion: "INSERT",
   registro_id: usuarioCreado.id,
   usuario_id: usuario_ejecutor,
-  descripcion: 'Registro de nuevo usuario',
+  descripcion: "Registro de nuevo usuario",
   datos_anteriores: null,
   datos_nuevos: usuarioCreado,
-  ip_origen: ip
+  ip_origen: ip,
 });
 ```
 
 ---
 
 ### 5. **Integración de Rutas - `routes/index_routes.js`**
+
 - Ubicación: [src/routes/index_routes.js](../../FASE%203/backend/src/routes/index_routes.js)
 - **Mount point:** `router.use('/usuarios', usuarioRoutes);`
 - **Ruta final:** `/api/usuarios` → Enruta a `usuarioRoutes.js`
 
 **Módulos integrados:**
+
 - `/api/orden` - Gestión de órdenes
 - `/api/facturacion` - Facturación
 - `/api/usuarios` - Gestión de usuarios ✓
@@ -155,9 +173,11 @@ await Auditoria.registrar({
 ## 🎨 ESTRUCTURA DEL FRONTEND (FASE 3/frontend/src)
 
 ### 1. **Página/Componente - `pages/Registro/TiposRegistro.tsx`**
+
 **Ubicación:** [src/pages/Registro/TiposRegistro.tsx](../../FASE%203/frontend/src/pages/Registro/TiposRegistro.tsx)
 
 **Características:**
+
 - Componente React con TypeScript (`.tsx`)
 - **Campos del formulario:**
   - NIT (requerido)
@@ -169,11 +189,13 @@ await Auditoria.registrar({
   - Confirm Password (requerido)
 
 **Validaciones en frontend:**
+
 - ✓ Las contraseñas deben coincidir
 - ✓ Campos requeridos: NIT, Email, Password
 - ✓ Manejo de estados: loading, error, success
 
 **Flujo de componente:**
+
 ```typescript
 const [formData, setFormData] = useState({...})
 const [isLoading, setIsLoading] = useState(false)
@@ -188,6 +210,7 @@ const [success, setSuccess] = useState<string | null>(null)
 ```
 
 **Interfaz visual:**
+
 - Layout de dos columnas (imagen de camión + formulario)
 - Menú principal en la parte superior
 - Gradiente azul/indigo
@@ -197,28 +220,31 @@ const [success, setSuccess] = useState<string | null>(null)
 ---
 
 ### 2. **Servicio de Autenticación - `services/auth/authApi.ts`**
+
 **Ubicación:** [src/services/auth/authApi.ts](../../FASE%203/frontend/src/services/auth/authApi.ts)
 
 **Función:** `registerRequest()`
+
 ```typescript
 export async function registerRequest(payload: RegisterPayload) {
   const response = await apiService.register(payload);
   return {
     ok: response.ok,
     mensaje: response.mensaje,
-    data: response.data
+    data: response.data,
   };
 }
 ```
 
 **Payload esperado:**
+
 ```typescript
 export type RegisterPayload = {
   nit: string;
   email: string;
   password: string;
   confirmPassword: string;
-  role: string;  // e.g., 'cliente'
+  role: string; // e.g., 'cliente'
   nombres?: string;
   apellidos?: string;
   telefono?: string;
@@ -226,6 +252,7 @@ export type RegisterPayload = {
 ```
 
 **Respuesta esperada:**
+
 ```typescript
 export type RegisterResponse = {
   id: number;
@@ -237,13 +264,16 @@ export type RegisterResponse = {
 ---
 
 ### 3. **API Base Service - `services/api.ts`**
+
 **Ubicación:** [src/services/api.ts](../../FASE%203/frontend/src/services/api.ts)
 
 **Configuración:**
+
 - `API_BASE_URL = "/api"`
 - Método HTTP: `POST /api/auth/register` (asumido)
 
 **Tipos TypeScript definidos:**
+
 - `RegisterPayload` - Datos para registro
 - `RegisterResponse` - Respuesta de registro
 - `LoginPayload`, `LoginResponse` - Para login
@@ -328,6 +358,7 @@ export type RegisterResponse = {
 ## 🔐 Consideraciones de Seguridad
 
 ### Backend:
+
 1. ✅ **Hash de contraseña:** bcrypt con 10 salt rounds
 2. ✅ **Auditoría:** Registra usuario que registra y IP
 3. ✅ **Autenticación:** Requiere JWT en header
@@ -335,6 +366,7 @@ export type RegisterResponse = {
 5. ⚠️ **UNIQUE constraints:** Email y NIT únicos en BD
 
 ### Frontend:
+
 1. ✅ **Validación:** Contraseñas coinciden
 2. ✅ **Estados:** Loading, error, success
 3. ✅ **Limpieza:** Limpia formulario tras éxito
